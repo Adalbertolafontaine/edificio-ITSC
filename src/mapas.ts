@@ -1,6 +1,9 @@
-import L from "leaflet";
+import "leaflet";
 import edificaciones from "./edificaciones.json";
 import datos_edificaciones from "./informacion.json";
+
+declare let L: any;
+
 
 const etiquetas = {
   computadoras: "Computadoras",
@@ -32,7 +35,7 @@ const Mapa = () => {
       '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>',
   }).addTo(map);
 
-  const info = L.control();
+  const info =  L.Control();
 
   info.onAdd = function (map: L.Map) {
     map;
@@ -70,25 +73,10 @@ const Mapa = () => {
   info.addTo(map);
 
   // get color depending on population density value
-  function getColor(d) {
-    return d > 1000
-      ? "#800026"
-      : d > 500
-      ? "#BD0026"
-      : d > 200
-      ? "#E31A1C"
-      : d > 100
-      ? "#FC4E2A"
-      : d > 50
-      ? "#FD8D3C"
-      : d > 20
-      ? "#FEB24C"
-      : d > 10
-      ? "#FED976"
-      : "#FFEDA0";
-  }
+
 
   function style(feature) {
+    feature;
     return {
       weight: 2,
       opacity: 1,
@@ -167,10 +155,10 @@ const Mapa = () => {
   }
 
   // Variable para almacenar el edificio seleccionado
-let edificioSeleccionado = null;
+let edificioSeleccionado:any = null;
 
 // Función para mantener visualmente el edificio seleccionado
-function seleccionarEdificio(layer) {
+function seleccionarEdificio(layer:any) {
   if (edificioSeleccionado) {
     // Restablece el estilo del edificio previamente seleccionado
     geojson.resetStyle(edificioSeleccionado);
