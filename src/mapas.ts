@@ -12,7 +12,6 @@ const etiquetas = {
 };
 
 const Mapa = () => {
-  
 
   const map: L.Map = L.map("map", {
     center: [18.53422304, -69.80257606],
@@ -26,7 +25,6 @@ const Mapa = () => {
 
   map.boxZoom.enable();
   map.dragging.disable();
-  //map.setMaxBounds([[18.53531662,-69.80128572], [18.53312946,-69.8038673512719]]);
 
   L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
     maxZoom: 19,
@@ -48,9 +46,8 @@ const Mapa = () => {
     if (props) {
       let letra = props.Letra;
       contents = `<b>${props.Nombre}</b><br/>(${letra})`;
-	  
+      
       if (datos_edificaciones[letra]) {
-		
         for (const key in etiquetas) {
           if (Object.prototype.hasOwnProperty.call(etiquetas, key)) {
             let element = datos_edificaciones[letra][key];
@@ -117,7 +114,6 @@ const Mapa = () => {
     info.update(layer.feature.properties);
   }
 
-  /* global statesData */
   const geojson = L.geoJson(edificaciones, {
     style,
     onEachFeature,
@@ -132,39 +128,100 @@ const Mapa = () => {
     map.fitBounds(e.target.getBounds());
   }
 
-  function onEachFeature(feature, layer) {
-    layer.on({
-      mouseover: highlightFeature,
-      mouseout: resetHighlight,
-      click: zoomToFeature,
+  // Función para mostrar los problemas en el panel de información
+  function mostrarProblemas(letraEdificio, problemas) {
+    const infoContainer = document.querySelector('.card-body');
+  
+    if (!infoContainer) {
+      console.error("Contenedor de información no encontrado.");
+      return;
+    }
+  
+    let htmlContent = `<h5 class="card-title">Edificio ${letraEdificio}</h5>`;
+    htmlContent += `<p>Problemas reportados en este edificio:</p>`;
+  
+    // Iterar sobre los problemas recibidos desde la API
+    problemas.forEach(problema => {
+      // Separar los problemas en caso de que estén separados por ;
+      const listaProblemas = problema.tipoproblema.split(';').map(p => p.trim()).filter(p => p);
+  
+      htmlContent += `
+        <div>
+          <strong>Nivel:</strong> ${problema.nivel} <br/>
+          <strong>Tipo:</strong> ${problema.tipoespacio} <br/>
+          <strong>Área:</strong> ${problema.nombreespacio} <br/>
+          <strong>Problemas:</strong> 
+          <ul>
+      `;
+  
+      // Iterar sobre los problemas y mostrarlos en una lista
+      listaProblemas.forEach(p => {
+        htmlContent += `<li>${p}</li>`;
+      });
+  
+      htmlContent += `</ul></div><hr/>`;
     });
+  
+    // Actualizar el contenido del panel
+    infoContainer.innerHTML = htmlContent;
   }
+
+  // Variable para almacenar el edificio seleccionado
+let edificioSeleccionado = null;
+
+// Función para mantener visualmente el edificio seleccionado
+function seleccionarEdificio(layer) {
+  if (edificioSeleccionado) {
+    // Restablece el estilo del edificio previamente seleccionado
+    geojson.resetStyle(edificioSeleccionado);
+  }
+
+  // Aplica el estilo de "seleccionado" al nuevo edificio
+  layer.setStyle({
+    weight: 5,
+    color: "#FF0000",           // Cambia el color del borde para el edificio seleccionado
+    dashArray: '',
+    fillOpacity: 0.7,
+    fillColor: "#FFEDA0"        // Cambia el color de relleno del edificio seleccionado
+  });
+
+  // Almacena el edificio actualmente seleccionado
+  edificioSeleccionado = layer;
+}
+
+function onEachFeature(feature, layer) {
+  layer.on({
+    mouseover: highlightFeature,
+    mouseout: function(e) {
+      // Solo restablece el estilo si el edificio no está seleccionado
+      if (edificioSeleccionado !== e.target) {
+        resetHighlight(e);
+      }
+    },
+    click: function(e) {
+      const letraEdificio = feature.properties.Letra;
+
+      // Hacer fetch a la API
+      fetch(`http://localhost:3000/api/edificios/${letraEdificio}`)
+        .then(response => response.json())
+        .then(data => {
+          mostrarProblemas(letraEdificio, data);
+
+          // Seleccionar visualmente el edificio en el mapa
+          seleccionarEdificio(layer); // Mantener el edificio seleccionado
+        })
+        .catch(err => {
+          console.error('Error al obtener los problemas:', err);
+        });
+
+      zoomToFeature(e); // Hacer zoom después de hacer clic
+    }
+  });
+}
 
   map.attributionControl.addAttribution(
     '<a href="https://itsc.edu.do/">ITSC</a>'
   );
-
-  /*
-	const legend = L.control({position: 'bottomright'});
-
-	legend.onAdd = function (map) {
-
-		const div = L.DomUtil.create('div', 'info legend');
-		const grades = [0, 10, 20, 50, 100, 200, 500, 1000];
-		const labels = [];
-		let from, to;
-
-		for (let i = 0; i < grades.length; i++) {
-			from = grades[i];
-			to = grades[i + 1];
-
-			labels.push(`<i style="background:${getColor(from + 1)}"></i> ${from}${to ? `&ndash;${to}` : '+'}`);
-		}
-
-		div.innerHTML = labels.join('<br>');
-		return div;
-	};
-
-	legend.addTo(map);*/
 };
+
 export { Mapa };

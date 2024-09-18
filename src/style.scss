@@ -14,6 +14,56 @@
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
+/* Estilo para asegurar que el contenedor tenga scroll */
+.card-body {
+  overflow-y: auto;            /* Habilita scroll si el contenido lo requiere */
+  max-height: 400px;           /* Ajusta este valor según el espacio que desees asignar al contenedor */
+  scrollbar-width: auto;       /* Barra de desplazamiento para Firefox */
+  scrollbar-color: dark;       /* Color de la barra de desplazamiento en Firefox */
+}
+
+/* Estilos para navegadores basados en WebKit (Chrome, Safari) */
+.card-body::-webkit-scrollbar {
+  width: 8px;                  /* Ancho de la barra de desplazamiento */
+}
+
+.card-body::-webkit-scrollbar-thumb {
+  background-color: rgba(0, 0, 0, 0.5); /* Color de la barra de desplazamiento */
+  border-radius: 10px;
+}
+
+.card-body::-webkit-scrollbar-track {
+  background-color: rgba(0, 0, 0, 0.1); /* Color de la pista */
+}
+
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+#app {
+  display: flex;
+  flex-direction: row;
+  height: 100vh; /* Ajusta el contenedor principal al tamaño de la ventana */
+}
+
+aside {
+  background-color: #f8f9fa;
+  overflow-y: auto; /* Permite hacer scroll si el contenido es muy grande */
+  min-height: 100vh; /* Asegura que el fondo del aside cubra toda la página */
+}
+
+main {
+  flex-grow: 1;
+  min-height: 100vh; /* Asegura que el mapa también cubra toda la página */
+}
+
+.card-body {
+  overflow-y: auto;
+  max-height: calc(100vh - 150px); /* Ajusta el tamaño del contenido dentro del aside */
+}
 
 a {
   font-weight: 500;
@@ -121,4 +171,25 @@ button:focus-visible {
   button {
     background-color: #f9f9f9;
   }
+}
+
+
+header {
+  background-color: #bf2026;
+  color: white;
+  padding: 1rem;
+  text-align: center;
+  position: relative;
+}
+
+.header-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.logo {
+  width: 150px;
+  height: auto;
 }
